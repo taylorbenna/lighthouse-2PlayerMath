@@ -147,6 +147,11 @@
     self.inputText.text = self.answerString;
 }
 
+- (IBAction)clearButtonPressed:(UIButton *)sender {
+    self.answerString = [@"" mutableCopy];
+    self.inputText.text = @"";
+}
+
 - (void)makeRandomQuestion {
     int num1 = arc4random_uniform(19) + 1;
     int num2 = arc4random_uniform(19) + 1;
