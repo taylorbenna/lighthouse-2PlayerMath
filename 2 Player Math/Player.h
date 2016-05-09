@@ -11,8 +11,8 @@
 @interface Player : NSObject
 
 @property (nonatomic) int lives;
-@property (nonatomic) int score;
+@property (nonatomic) NSString *name;
 
--(void) playerLosesLife;
+- (instancetype)initWithName:(NSString*)name;
 
 @end

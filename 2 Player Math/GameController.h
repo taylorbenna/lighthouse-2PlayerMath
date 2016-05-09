@@ -11,7 +11,9 @@
 
 @interface GameController : NSObject
 
-@property (nonatomic) NSArray *players;
-@property (nonatomic) BOOL isPlayerOne;
+@property (nonatomic) NSMutableArray *players;
+@property (nonatomic) Player *currentPlayer;
+
+-(void)changePlayer;
 
 @end

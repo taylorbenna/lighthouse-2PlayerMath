@@ -10,4 +10,12 @@
 
 @implementation GameController
 
+-(void)changePlayer {
+    if ([self.currentPlayer isEqual:self.players[0]]) {
+        self.currentPlayer = self.players[1];
+    } else {
+        self.currentPlayer = self.players[0];
+    }
+}
+
 @end

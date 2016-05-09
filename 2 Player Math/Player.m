@@ -10,18 +10,14 @@
 
 @implementation Player
 
-- (instancetype)init
+- (instancetype)initWithName:(NSString*)name
 {
     self = [super init];
     if (self) {
-        self.score = 0;
         self.lives = 3;
+        self.name = [[NSString alloc] initWithString:name];
     }
     return self;
-}
-
--(void) playerLosesLife {
-    self.lives--;
 }
 
 @end

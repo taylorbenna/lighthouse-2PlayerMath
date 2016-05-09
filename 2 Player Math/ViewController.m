@@ -7,7 +7,7 @@
 //
 
 #import "ViewController.h"
-#import "Player.h"
+#import "GameController.h"
 
 @interface ViewController ()
 
@@ -18,11 +18,13 @@
 @property (weak, nonatomic) IBOutlet UITextField *inputText;
 @property (weak, nonatomic) IBOutlet UILabel *correctLabel;
 
-@property (nonatomic) Player *player1;
-@property (nonatomic) Player *player2;
+//@property (nonatomic) Player *player1;
+//@property (nonatomic) Player *player2;
+//@property (nonatomic) Player *currentPlayer;
 @property (nonatomic) int answer;
 @property (nonatomic) NSMutableString *answerString;
-@property (nonatomic) BOOL isPlayerOne;
+@property (nonatomic) GameController *game;
+//@property (nonatomic) BOOL isPlayerOne;
 
 @end
 
@@ -30,10 +32,13 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.player1 = [[Player alloc] init];
-    self.player2 = [[Player alloc] init];
+    self.game = [[GameController alloc] init];
+    self.game.players = [[NSMutableArray alloc] init];
+    [self.game.players addObject: [[Player alloc] initWithName:@"Player 1"]];
+    [self.game.players addObject: [[Player alloc] initWithName:@"Player 2"]];
+    self.game.currentPlayer = [[Player alloc] init];
+    self.game.currentPlayer = self.game.players[0];
     self.answerString = [[NSMutableString alloc] init];
-    self.isPlayerOne = YES;
     [self makeRandomQuestion];
     [self printLives];
     
@@ -52,11 +57,7 @@
     } else {
         self.correctLabel.text = @"Incorrect";
         self.correctLabel.textColor = [UIColor colorWithRed:240/255.f green:65/255.f blue:38/255.f alpha:1.0];
-        if (self.isPlayerOne) {
-            self.player1.lives -=1;
-        } else {
-            self.player2.lives -= 1;
-        }
+        self.game.currentPlayer.lives -=1;
     }
     
     self.correctLabel.alpha = 1.0;
@@ -66,19 +67,12 @@
     self.answer = 0;
     self.answerString = [NSMutableString string];
     [self printLives];
-    if(self.isPlayerOne) {
-        self.isPlayerOne = NO;
-    } else {
-        self.isPlayerOne = YES;
-    }
+  
     
-    if (self.player1.lives == 0 || self.player2.lives == 0) {
+    if (self.game.currentPlayer.lives == 0) {
         NSString *str = [NSString new];
-        if (self.isPlayerOne){
-            str = @"Player 1 has Won!";
-        } else {
-            str = @"Player 2 has Won!";
-        }
+        [self.game changePlayer];
+        str = [NSString stringWithFormat:@"%@ has Won!", self.game.currentPlayer.name];
         UIAlertController* alert = [UIAlertController alertControllerWithTitle:str message: @"Would you like to play again?"
                                                                 preferredStyle:UIAlertControllerStyleAlert];
         
@@ -96,9 +90,11 @@
         [alert addAction:noAction];
         [self presentViewController:alert animated:YES completion:nil];
     } else {
+        [self.game changePlayer];
         [self makeRandomQuestion];
 
     }
+    
 }
 
 - (IBAction)oneButtonPressed:(UIButton *)sender {
@@ -155,34 +151,35 @@
     int num1 = arc4random_uniform(19) + 1;
     int num2 = arc4random_uniform(19) + 1;
     self.answer = num1 + num2;
-    if (self.isPlayerOne) {
-        self.questionLabel.text = [NSString stringWithFormat:@"Player 1: %d + %d = ?", num1, num2];
-    } else {
-        self.questionLabel.text = [NSString stringWithFormat:@"Player 2: %d + %d = ?", num1, num2];
-
-    }
+    self.questionLabel.text = [NSString stringWithFormat:@"%@: %d + %d = ?",self.game.currentPlayer.name, num1, num2];
     
 }
 
 -(void) printLives {
     NSMutableString *lives = [[NSMutableString alloc] init];
+    
     lives = [@"Player 1 Lives: " mutableCopy];
-    for (int i = 0; i < self.player1.lives; i++) {
+    Player *play = [[Player alloc] init];
+    play = self.game.players[0];
+    for (int i = 0; i < play.lives; i++) {
         lives = [[lives stringByAppendingString:@"♥"] mutableCopy];
     }
     self.playerOneScoreLabel.text = lives;
+    
+    play = self.game.players[1];
     lives = [@"Player 2 Lives: " mutableCopy];
-    for (int i = 0; i < self.player2.lives; i++) {
+    for (int i = 0; i < play.lives; i++) {
         lives = [[lives stringByAppendingString:@"♥"] mutableCopy];
     }
     self.playerTwoScoreLabel.text = lives;
 }
 
 -(void) restartGame {
-    self.player1.lives = 3;
-    self.player2.lives = 3;
+    for (Player *play in self.game.players) {
+        play.lives = 3;
+    }
     [self printLives];
-    self.isPlayerOne = YES;
+    self.game.currentPlayer = self.game.players[0];
     [self makeRandomQuestion];
     
 }
